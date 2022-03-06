@@ -17,7 +17,7 @@ public class GameHub : Hub<IGameClient>
 
     public override async Task OnConnectedAsync()
     {
-        var user = this.Context.User ?? throw new ArgumentNullException($"this.Context.User");
+        var user = this.Context.User ?? throw new ArgumentNullException(nameof(this.Context.User));
         //Find a session or create a new one
         var userId = user.Claims.First(c => c.Type == "user_id").Value;
         var player = await _playerService.GetPlayer(userId);
