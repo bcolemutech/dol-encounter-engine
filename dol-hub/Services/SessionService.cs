@@ -1,34 +1,45 @@
 ﻿namespace dol_hub.Services;
 
 using dol_sdk.POCOs;
+using Google.Cloud.Firestore;
 
 public interface ISessionService
 {
     Task<ISession?> GetSession(string sessionId);
-    Task AddSession(ISession session);
-    Task EndSession(string sessionId);
-    Task UpdateSession(ISession session);
+    Task Upsert(ISession session);
+    Task Terminate(string sessionId);
 }
 
 public class SessionService : ISessionService
 {
-    public Task<ISession?> GetSession(string sessionId)
+    private const string Sessions = "sessions";
+    private readonly FirestoreDb _db;
+    
+    public SessionService(IConfiguration configuration)
     {
-        throw new NotImplementedException();
+        _db = FirestoreDb.Create(configuration["ProjectId"]);
+    }
+    
+    public async Task<ISession?> GetSession(string sessionId)
+    {
+        var docRef = _db.Collection(Sessions).Document(sessionId);
+
+        var snapshot = await docRef.GetSnapshotAsync();
+
+        return snapshot.Exists
+            ? snapshot.ConvertTo<Session>()
+            : throw new KeyNotFoundException($"No session found with ID: {sessionId}");
     }
 
-    public Task AddSession(ISession session)
+    public async Task Upsert(ISession session)
     {
-        throw new NotImplementedException();
+        var docRef = _db.Collection(Sessions).Document(session.ID);
+        await docRef.SetAsync(session, SetOptions.MergeAll);
     }
 
-    public Task EndSession(string sessionId)
+    public async Task Terminate(string sessionId)
     {
-        throw new NotImplementedException();
-    }
-
-    public Task UpdateSession(ISession session)
-    {
-        throw new NotImplementedException();
+        var docRef = _db.Collection(Sessions).Document(sessionId);
+        await docRef.DeleteAsync();
     }
 }
