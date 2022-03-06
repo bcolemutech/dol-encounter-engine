@@ -19,28 +19,25 @@ public class GameHub : Hub<IGameClient>
     {
         var user = this.Context.User ?? throw new ArgumentNullException($"this.Context.User");
         //Find a session or create a new one
-        var player = await _playerService.GetPlayer(user.Identity?.Name);
+        var userId = user.Claims.First(c => c.Type == "user_id").Value;
+        var player = await _playerService.GetPlayer(userId);
         var session = await _sessionService.GetSession(player.SessionId);
+
         if (session is null)
         {
             session = new Session();
             session.ID = Guid.NewGuid().ToString();
-            player.ConnectionId = Context.ConnectionId;
-            await _playerService.UpdatePlayer(player);
-            session.Players.Add(player);
-            await _sessionService.AddSession(session);
-        }
-        else
-        {
-            player.ConnectionId = Context.ConnectionId;
-            await _playerService.UpdatePlayer(player);
-            session.Players.Add(player);
-            await _sessionService.UpdateSession(session);
+            player.SessionId = session.ID;
         }
 
+        player.ConnectionId = Context.ConnectionId;
+        await _playerService.UpdatePlayer(userId, player);
+        session.Players.Add(player);
+        await _sessionService.Upsert(session);
+        
         await Groups.AddToGroupAsync(Context.ConnectionId, session.ID);
         await base.OnConnectedAsync();
-        
+
         await Clients.Group(session.ID).GameUpdate(session);
     }
 
@@ -55,12 +52,13 @@ public class GameHub : Hub<IGameClient>
             session.Players.Remove(player);
             if (session.Players.Count == 0)
             {
-                await _sessionService.EndSession(session.ID);
+                await _sessionService.Terminate(session.ID);
             }
             else
             {
-                await _sessionService.UpdateSession(session);
+                await _sessionService.Upsert(session);
             }
+
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, session.ID);
             await Clients.Group(session.ID).PlayerDropOut(player.Email);
         }
