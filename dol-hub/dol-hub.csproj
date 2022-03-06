@@ -10,6 +10,7 @@
 
     <ItemGroup>
         <PackageReference Include="dol-sdk" Version="1.0.12" />
+        <PackageReference Include="Google.Cloud.Firestore" Version="2.5.0" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
     </ItemGroup>
 
