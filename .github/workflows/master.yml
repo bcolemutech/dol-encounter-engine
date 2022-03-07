@@ -1,0 +1,34 @@
+﻿name: Master Push
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  deploy:
+    name: Cloud Run Deployment
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Push to GCR
+        uses: RafikFarhad/push-to-gcr-github-action@v3.0.2
+        with:
+          gcloud_service_key: ${{ secrets.GCP_SA_KEY }}
+          registry: gcr.io
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          image_name: dol-hub
+
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v0.4.0'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v0.6.0
+        with:
+          service: api
+          image: gcr.io/${{ secrets.GCP_PROJECT_ID }}/dol-hub
