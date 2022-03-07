@@ -1,4 +1,4 @@
-﻿---
+---
 name: Issue Tracker
 about: Issue tracker is ONLY used for reporting bugs.
 title: ''
