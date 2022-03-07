@@ -13,7 +13,6 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<ISessionService, SessionService>();
 builder.Services.AddSingleton<IPlayerService, PlayerService>();
 
-var app = builder.Build();
 
 builder.Configuration.AddJsonFile("appsettings.json");
 
@@ -27,6 +26,7 @@ builder.Services.AddAuthorization(option =>
     option.AddPolicy("Players", policy => policy.RequireClaim("Authority", "0", "1", "2"));
 });
 
+var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
