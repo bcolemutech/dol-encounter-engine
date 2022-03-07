@@ -1,9 +1,11 @@
 ﻿namespace dol_hub;
 
 using dol_sdk.POCOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Services;
 
+[Authorize("Players")]
 public class GameHub : Hub<IGameClient>
 {
     private readonly ISessionService _sessionService;
