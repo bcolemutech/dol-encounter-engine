@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Services;
 
-[Authorize("Players")]
+[Authorize]
 public class GameHub : Hub<IGameClient>
 {
     private readonly ISessionService _sessionService;
