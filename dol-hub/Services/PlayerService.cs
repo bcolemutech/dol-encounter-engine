@@ -1,13 +1,13 @@
 ﻿namespace dol_hub.Services;
 
-using dol_sdk.POCOs;
 using Google.Cloud.Firestore;
 using Microsoft.Extensions.Configuration;
+using dol_sdk.POCOs;
 
 public interface IPlayerService
 {
     Task<User> GetPlayer(string? userId);
-    Task UpdatePlayer(string userId, IUser? player);
+    Task UpdatePlayer(string userId, User? player);
 }
 
 public class PlayerService : IPlayerService
@@ -31,7 +31,7 @@ public class PlayerService : IPlayerService
             : throw new KeyNotFoundException($"No player found with ID: {userId}");
     }
 
-    public async Task UpdatePlayer(string userId, IUser? player)
+    public async Task UpdatePlayer(string userId, User? player)
     {
         var docRef = _db.Collection(Players).Document(userId);
         await docRef.SetAsync(player, SetOptions.MergeAll);
