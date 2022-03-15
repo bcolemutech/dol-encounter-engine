@@ -3,6 +3,7 @@ using dol_hub.Services;
 using FirebaseAdmin;
 using AspNetCore.Firebase.Authentication.Extensions;
 using Google.Apis.Auth.OAuth2;
+using Microsoft.AspNet.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,6 +45,10 @@ app.UseRouting();
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+GlobalHost.Configuration.ConnectionTimeout = TimeSpan.FromSeconds(110);
+GlobalHost.Configuration.DisconnectTimeout = TimeSpan.FromSeconds(30);
+GlobalHost.Configuration.KeepAlive = TimeSpan.FromSeconds(10);
 
 app.UseEndpoints(endpoints => { endpoints.MapHub<GameHub>("/hub"); });
 
