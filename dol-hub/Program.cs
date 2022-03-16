@@ -16,7 +16,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<ISessionService, SessionService>();
 builder.Services.AddSingleton<IPlayerService, PlayerService>();
 
-
+builder.Configuration.AddEnvironmentVariables();
 builder.Configuration.AddJsonFile("appsettings.json");
 
 var options = new AppOptions
@@ -28,7 +28,11 @@ var options = new AppOptions
 var fApp = FirebaseApp.Create(options);
 Console.WriteLine($"My app ID is {fApp.Options.ProjectId}!");
 
-builder.Services.AddFirebaseAuthentication(builder.Configuration["FirebaseAuthentication:Issuer"],
+var issuer = string.IsNullOrWhiteSpace(builder.Configuration["FIREBASE_AUTH_EMULATOR_HOST"])
+    ? builder.Configuration["FirebaseAuthentication:Issuer"]
+    : builder.Configuration["FIREBASE_AUTH_EMULATOR_HOST"];
+
+builder.Services.AddFirebaseAuthentication(issuer,
     builder.Configuration["FirebaseAuthentication:Audience"]);
 
 var app = builder.Build();
