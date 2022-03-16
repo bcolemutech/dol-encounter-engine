@@ -28,7 +28,7 @@ public class SessionService : ISessionService
 
         return snapshot.Exists
             ? snapshot.ConvertTo<Session>()
-            : throw new KeyNotFoundException($"No session found with ID: {sessionId}");
+            : null;
     }
 
     public async Task Upsert(ISession session)
