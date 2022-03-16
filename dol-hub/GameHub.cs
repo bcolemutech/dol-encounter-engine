@@ -50,7 +50,7 @@ public class GameHub : Hub<IGameClient>
     {
         ISession session = new Session();
         session.ID = Guid.NewGuid().ToString();
-        session.Players = new List<IUser>();
+        session.Players = new List<User>();
         player.SessionId = session.ID;
         return session;
     }
