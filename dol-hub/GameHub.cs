@@ -58,7 +58,8 @@ public class GameHub : Hub<IGameClient>
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         var user = this.Context.User ?? throw new ArgumentNullException(nameof(this.Context.User));
-        var player = await _playerService.GetPlayer(user.Identity?.Name);
+        var userId = user.Claims.First(c => c.Type == "user_id").Value;
+        var player = await _playerService.GetPlayer(userId);
         var session = await _sessionService.GetSession(player.SessionId);
         //If game is complete delete it
         if (session is not null)
