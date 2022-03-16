@@ -23,13 +23,16 @@ public class GameHub : Hub<IGameClient>
         //Find a session or create a new one
         var userId = user.Claims.First(c => c.Type == "user_id").Value;
         var player = await _playerService.GetPlayer(userId);
-        var session = await _sessionService.GetSession(player.SessionId);
 
-        if (session is null)
+        ISession session;
+
+        if (string.IsNullOrWhiteSpace(player.SessionId))
         {
-            session = new Session();
-            session.ID = Guid.NewGuid().ToString();
-            player.SessionId = session.ID;
+            session = NewSession(player);
+        }
+        else
+        {
+            session = await _sessionService.GetSession(player.SessionId) ?? NewSession(player);
         }
 
         player.ConnectionId = Context.ConnectionId;
@@ -41,6 +44,14 @@ public class GameHub : Hub<IGameClient>
         await base.OnConnectedAsync();
 
         await Clients.Group(session.ID).GameUpdate(session);
+    }
+
+    private static ISession NewSession(IUser player)
+    {
+        ISession session = new Session();
+        session.ID = Guid.NewGuid().ToString();
+        player.SessionId = session.ID;
+        return session;
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
@@ -71,6 +82,6 @@ public class GameHub : Hub<IGameClient>
 
 public interface IGameClient
 {
-    Task GameUpdate(ISession session);
+    Task GameUpdate(ISession? session);
     Task PlayerDropOut(string playerEmail);
 }
