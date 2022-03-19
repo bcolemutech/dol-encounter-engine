@@ -37,7 +37,7 @@ public class GameHub : Hub<IGameClient>
 
         player.ConnectionId = Context.ConnectionId;
         await _playerService.UpdatePlayer(userId, player);
-        session.Players.Add(player);
+        session.Players = session.Players.Where(x => x.UserId != player.UserId).Append(player).ToArray();
         await _sessionService.Upsert(session);
         
         await Groups.AddToGroupAsync(Context.ConnectionId, session.ID);
@@ -64,7 +64,8 @@ public class GameHub : Hub<IGameClient>
         //If game is complete delete it
         if (session is not null)
         {
-            session.Players.Remove(player);
+            session.Players = session.Players.Where(x => x.UserId != player.UserId).ToArray();
+            
             if (session.Players.Count == 0)
             {
                 await _sessionService.Terminate(session.ID);
