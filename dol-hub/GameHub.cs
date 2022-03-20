@@ -28,11 +28,11 @@ public class GameHub : Hub<IGameClient>
 
         if (string.IsNullOrWhiteSpace(player.SessionId))
         {
-            session = NewSession(player);
+            session = await _sessionService.NewSession(player);
         }
         else
         {
-            session = await _sessionService.GetSession(player.SessionId) ?? NewSession(player);
+            session = await _sessionService.GetSession(player.SessionId) ?? await _sessionService.NewSession(player);
         }
 
         player.ConnectionId = Context.ConnectionId;
@@ -46,14 +46,7 @@ public class GameHub : Hub<IGameClient>
         await Clients.Group(session.ID).GameUpdate(session);
     }
 
-    private static ISession NewSession(IUser player)
-    {
-        ISession session = new Session();
-        session.ID = Guid.NewGuid().ToString();
-        session.Players = new List<User>();
-        player.SessionId = session.ID;
-        return session;
-    }
+
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
