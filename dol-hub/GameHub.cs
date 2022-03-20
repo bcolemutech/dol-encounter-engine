@@ -76,7 +76,7 @@ public class GameHub : Hub<IGameClient>
             }
 
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, session.ID);
-            await Clients.Group(session.ID).PlayerDropOut(player.Email);
+            await Clients.Group(session.ID).GameUpdate(session);
         }
 
         await base.OnDisconnectedAsync(exception);
@@ -86,5 +86,4 @@ public class GameHub : Hub<IGameClient>
 public interface IGameClient
 {
     Task GameUpdate(ISession? session);
-    Task PlayerDropOut(string playerEmail);
 }
