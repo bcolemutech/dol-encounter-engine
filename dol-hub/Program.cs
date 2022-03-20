@@ -15,6 +15,7 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddSingleton<ISessionService, SessionService>();
 builder.Services.AddSingleton<IPlayerService, PlayerService>();
+builder.Services.AddSingleton<ICharacterService, CharacterService>();
 
 builder.Configuration.AddEnvironmentVariables();
 builder.Configuration.AddJsonFile("appsettings.json");
