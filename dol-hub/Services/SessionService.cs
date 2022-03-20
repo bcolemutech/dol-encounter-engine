@@ -8,6 +8,7 @@ public interface ISessionService
     Task<ISession?> GetSession(string sessionId);
     Task Upsert(ISession session);
     Task Terminate(string sessionId);
+    Task<ISession> NewSession(User player);
 }
 
 public class SessionService : ISessionService
@@ -15,8 +16,11 @@ public class SessionService : ISessionService
     private const string Sessions = "sessions";
     private readonly FirestoreDb _db;
     
-    public SessionService(IConfiguration configuration)
+    private readonly ICharacterService _characterService;
+    
+    public SessionService(IConfiguration configuration, ICharacterService characterService)
     {
+        _characterService = characterService;
         _db = FirestoreDb.Create(configuration["ProjectId"]);
     }
     
@@ -41,5 +45,22 @@ public class SessionService : ISessionService
     {
         var docRef = _db.Collection(Sessions).Document(sessionId);
         await docRef.DeleteAsync();
+    }
+
+    public async Task<ISession> NewSession(User player)
+    {
+        var character = await _characterService.GetCharacter(player.UserId, player.CurrentCharacter);
+
+        if (character is null)
+        {
+            throw new NullReferenceException("Current character not set");
+        }
+        
+        ISession session = new Session();
+        session.ID = Guid.NewGuid().ToString();
+        session.Players = new List<User>();
+        session.Position = character.Position;
+        player.SessionId = session.ID;
+        return session;
     }
 }
